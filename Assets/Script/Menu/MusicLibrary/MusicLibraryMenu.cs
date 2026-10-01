@@ -224,6 +224,7 @@ namespace YARG.Menu.MusicLibrary
             SetRefreshIfNeeded();
 
             StemSettings.ApplySettings = SettingsManager.Settings.ApplyVolumesInMusicLibrary.Value;
+            SongContainer.ApplyDemucsLibraryRoots();
             StemSilenceScanner.WarmCache();
             _previewDelay = 0;
             if (_reloadState == MusicLibraryReloadState.Full)

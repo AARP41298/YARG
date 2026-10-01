@@ -146,9 +146,7 @@ namespace YARG.Song
 
         private static bool AllowedByRating(SongRating rating) => rating <= SettingsManager.Settings.MaxSongRating.Value;
 
-#nullable enable
-        public static async UniTask RunRefresh(bool quick, LoadingContext? context = null)
-#nullable disable
+        public static List<string> ApplyDemucsLibraryRoots()
         {
             var directories = new List<string>(SettingsManager.Settings.SongFolders);
             string setlistPath = PathHelper.SetlistPath;
@@ -156,6 +154,16 @@ namespace YARG.Song
             {
                 directories.Add(setlistPath);
             }
+
+            SongEntry.SetDemucsLibraryRoots(directories);
+            return directories;
+        }
+
+#nullable enable
+        public static async UniTask RunRefresh(bool quick, LoadingContext? context = null)
+#nullable disable
+        {
+            var directories = ApplyDemucsLibraryRoots();
 
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var previousSongCache = _songCache;
