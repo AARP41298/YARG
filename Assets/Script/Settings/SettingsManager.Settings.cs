@@ -295,6 +295,23 @@ namespace YARG.Settings
             public ToggleSetting RememberFilters { get; } = new(false);
 
             public ToggleSetting AllowDuplicateSongs { get; } = new(true, _ => MusicLibraryMenu.SetReload(MusicLibraryReloadState.Partial));
+
+            public SliderSetting DemucsShifts { get; } = new(1f, 1f, 8f, step: 1f);
+
+            public void GenerateMissingStems()
+            {
+                SongContainer.ApplyDemucsLibraryRoots();
+                DemucsStemGenerator.StartAllMissing(() =>
+                {
+                    MusicLibraryMenu.SetReload(MusicLibraryReloadState.Partial);
+                });
+            }
+
+            public void StopStemGeneration()
+            {
+                DemucsStemGenerator.Stop();
+            }
+
             public ToggleSetting UseFullDirectoryForPlaylists { get; } = new(false);
 
             public ToggleSetting ShowFavoriteButton { get; } = new(true);

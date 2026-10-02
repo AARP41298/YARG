@@ -233,7 +233,14 @@
             "StemsFailed": "Could not generate stems. {0}",
             "StemsAlreadyPresent": "This song already has vocals, bass, and drums.",
             "StemsBusy": "Stem generation is already running.",
-            "StemsChecking": "Checking songs for missing stems..."
+            "StemsChecking": "Checking songs for missing stems...",
+            "StemsNoneMissing": "No songs are missing stems.",
+            "StemsGeneratingAll": "Generating stems for {0} songs...",
+            "StemsGeneratedAll": "Stems generated for {0} songs.",
+            "StemsGeneratedPartial": "Stems generated for {0} songs. {1} failed.",
+            "StemsStopping": "Stopping stem generation...",
+            "StemsStopped": "Stem generation stopped. Stems generated for {0} songs.",
+            "StemsNotRunning": "Stem generation is not running."
         },
         "Dialog": {
             "DontShowAgain": "Don't Show Again",
@@ -1105,6 +1112,7 @@
             "SortingAndFiltering": "Sorting and Filtering",
             "PlayAShow": "Play A Show",
             "ScanningOptions": "Scanning Options",
+            "Stems": "Stems",
             "RB3E": "RB3E Settings",
             "Customization": "Buffer Customization",
             "StageKitDMXChannels": "Basic DMX Channels",
@@ -1132,12 +1140,18 @@
             "OpenExecutablePath": "Open Executable Path",
             "OpenPersistentDataPath": "Open Persistent Data Path",
             "RemoveRemoteContent": "Remove Cached Content",
-            "OpenAsioControlPanel": "Open ASIO Control Panel"
+            "OpenAsioControlPanel": "Open ASIO Control Panel",
+            "GenerateMissingStems": "Generate Missing Stems",
+            "StopStemGeneration": "Stop"
         },
         "Setting": {
             "AllowDuplicateSongs": {
                 "Name": "Allow Duplicate Songs",
                 "Description": "Allows duplicate songs to be scanned and displayed in the library. <color=white>Rescan required if changed!</color>"
+            },
+            "DemucsShifts": {
+                "Name": "Shifts",
+                "Description": "Passed to Demucs as --shifts. Each step is 1, from 1 to 8. Higher values can sound better and take longer."
             },
             "AmIAwesome": {
                 "Name": "Awesomeness Detection",

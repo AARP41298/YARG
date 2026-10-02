@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ManagedBass;
 using YARG.Audio.BASS;
@@ -26,6 +27,7 @@ namespace YARG.Song
         private static readonly double[] ProbeSeconds = { 20, 45, 90, 120 };
 
         private static readonly object Gate = new();
+        private static readonly ManualResetEventSlim Idle = new(true);
         private static bool _started;
         private static bool _announced;
         private static Dictionary<string, int> _cache = new();
@@ -72,17 +74,77 @@ namespace YARG.Song
                 }
 
                 _started = true;
+                Idle.Reset();
             }
 
-            Task.Run(() => Scan(pending));
+            Task.Run(() =>
+            {
+                try
+                {
+                    Scan(pending);
+                }
+                finally
+                {
+                    Idle.Set();
+                }
+            });
         }
 
-        private static void Scan(List<SongEntry> pending)
+        /// <summary>
+        /// Probes songs that still need a silence check and waits if a scan is already running.
+        /// </summary>
+        public static void ProbeBlocking(IReadOnlyList<SongEntry> songs, Func<bool> shouldStop = null)
+        {
+            WarmCache();
+            ApplyCache(songs);
+
+            List<SongEntry> pending = null;
+            var runHere = false;
+            lock (Gate)
+            {
+                if (!_started)
+                {
+                    pending = new List<SongEntry>();
+                    var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    AddPending(songs, pending, seen);
+                    if (pending.Count > 0)
+                    {
+                        _started = true;
+                        Idle.Reset();
+                        runHere = true;
+                    }
+                }
+            }
+
+            if (runHere)
+            {
+                try
+                {
+                    Scan(pending, shouldStop);
+                }
+                finally
+                {
+                    Idle.Set();
+                }
+            }
+            else
+            {
+                Idle.Wait();
+                ApplyCache(songs);
+            }
+        }
+
+        private static void Scan(List<SongEntry> pending, Func<bool> shouldStop = null)
         {
             int found = 0;
             int sinceSave = 0;
             foreach (var song in pending)
             {
+                if (shouldStop != null && shouldStop())
+                {
+                    break;
+                }
+
                 if (!song.NeedsStemSilenceProbe())
                 {
                     continue;

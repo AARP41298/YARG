@@ -67,6 +67,11 @@ namespace YARG.Menu.Settings.Visuals
             _ignoreCallback = true;
             _slider.MinimumValue = Setting.Min;
             _slider.MaximumValue = Setting.Max;
+            if (Setting.Step > 0f)
+            {
+                _slider.WholeNumbers = Mathf.Approximately(Setting.Step, 1f);
+                _slider.FormatString = "0";
+            }
 
             _ignoreCallback = false;
 
@@ -85,19 +90,25 @@ namespace YARG.Menu.Settings.Visuals
                 NavigateFinish,
                 new NavigationScheme.Entry(MenuAction.Up, "Menu.Common.Increase", () =>
                 {
-                    var range = Setting.Max - Setting.Min;
-                    Setting.Value += range / 20f;
-
+                    Setting.Value += SliderStep();
                     RefreshVisual();
                 }),
                 new NavigationScheme.Entry(MenuAction.Down, "Menu.Common.Decrease", () =>
                 {
-                    var range = Setting.Max - Setting.Min;
-                    Setting.Value -= range / 20f;
-
+                    Setting.Value -= SliderStep();
                     RefreshVisual();
                 })
             }, true);
+        }
+
+        private float SliderStep()
+        {
+            if (Setting.Step > 0f)
+            {
+                return Setting.Step;
+            }
+
+            return (Setting.Max - Setting.Min) / 20f;
         }
 
         public void OnValueChange()
