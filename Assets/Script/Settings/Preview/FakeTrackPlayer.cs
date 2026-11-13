@@ -228,6 +228,7 @@ namespace YARG.Settings.Preview
         // Renderers for the pro-keys highway overlay quads. Stored for live
         // recoloring on setting change.
         private readonly List<ProKeysOverlayRenderer> _proKeysOverlayRenderers = new();
+        private Material _proKeysOverlayMaterial;
 
         public bool ForceShowHitWindow { get; set; }
 
@@ -359,6 +360,7 @@ namespace YARG.Settings.Preview
                 CurrentGameModeInfo = info;
             }
             var theme = ThemePreset.Default;
+            var colorProfile = PresetsTab.GetLastSelectedPreset(CustomContentManager.ColorProfiles);
 
             // If we aren't using Pro Keys, then the passed instrument doesn't really matter; arbitrarily pass Five-Fret Guitar
             var style = VisualStyleHelpers.GetVisualStyle(SelectedGameMode, CurrentGameModeInfo.UseProKeys ? Instrument.ProKeys : Instrument.FiveFretGuitar);
@@ -375,7 +377,7 @@ namespace YARG.Settings.Preview
                         new Dictionary<int, int>(),
                         1, null, null,
                         theme, style);
-                    CreateProKeysOverlay(ColorProfile.Default.ProKeys);
+                    CreateProKeysOverlay(colorProfile.ProKeys);
                 }
                 else
                 {
@@ -384,9 +386,10 @@ namespace YARG.Settings.Preview
                         CurrentGameModeInfo.HighwayOrdering,
                         CurrentGameModeInfo.LaneCount,
                         CurrentGameModeInfo.KickFretPrefab,
-                        CurrentGameModeInfo.FretColorProvider(ColorProfile.Default),
+                        CurrentGameModeInfo.FretColorProvider(colorProfile),
                         theme,
-                        style
+                        style,
+                        dualHalfFrets: SelectedGameMode == GameMode.SixFretGuitar
                     );
                 }
                 _fretArray.transform.SetLayerRecursive(LayerMask.NameToLayer("Settings Preview"));
@@ -447,21 +450,15 @@ namespace YARG.Settings.Preview
                 ((FakeNote)note).OnSettingChanged();
             }
 
-            // Reverse the fret color order for guitar lefty flip. Frets use the default
-            // color profile; reversing their assignment mirrors the layout in place
-            // without moving frets or touching asymmetric theme graphics.
-            if (SelectedGameMode == GameMode.FiveFretGuitar)
+            if (CurrentGameModeInfo.UseHighwayOverlay)
+            {
+                RecolorProKeysOverlay(colorProfile.ProKeys);
+            }
+            else if (CurrentGameModeInfo.FretColorProvider != null)
             {
                 _fretArray.RecolorFrets(
-                    CurrentGameModeInfo.FretColorProvider(ColorProfile.Default),
-                    FretColorIndexForLefty);
-            }
-            else if (SelectedGameMode == GameMode.ProKeys && !UseFiveLaneKeys)
-            {
-                // Pro-keys: live-recolor the highway overlay sections with the
-                // PRESET's overlay colors (not ColorProfile.Default), so editing
-                // an overlay color live-updates without a rebuild.
-                RecolorProKeysOverlay(colorProfile.ProKeys);
+                    CurrentGameModeInfo.FretColorProvider(colorProfile),
+                    SelectedGameMode == GameMode.FiveFretGuitar ? FretColorIndexForLefty : null);
             }
         }
 
@@ -660,6 +657,11 @@ namespace YARG.Settings.Preview
 
         private void OnDestroy()
         {
+            if (_proKeysOverlayMaterial != null)
+            {
+                Destroy(_proKeysOverlayMaterial);
+            }
+
             if (_previewModeSupported)
             {
                 SettingsMenu.Instance.SettingChanged -= OnSettingChanged;
@@ -688,6 +690,17 @@ namespace YARG.Settings.Preview
         private void CreateProKeysOverlay(ColorProfile.ProKeysColors colors)
         {
             _proKeysOverlayRenderers.Clear();
+            if (_proKeysOverlayMaterial == null)
+            {
+                var shader = Shader.Find("Sprites-Default-Overlay");
+                if (shader == null)
+                {
+                    throw new InvalidOperationException("The keys preview requires the Sprites-Default-Overlay shader.");
+                }
+
+                _proKeysOverlayMaterial = new Material(shader);
+            }
+
             var layerMask = LayerMask.NameToLayer("Settings Preview");
 
             // Use SpriteRenderers so the transparent overlays do not occlude the
@@ -715,6 +728,7 @@ namespace YARG.Settings.Preview
                     overlayLayer.Band.Center, 0.01f, PRO_KEYS_OVERLAY_Z_CENTER);
 
                 var sr = overlay.AddComponent<SpriteRenderer>();
+                sr.sharedMaterial = _proKeysOverlayMaterial;
                 sr.sprite = overlayLayer.IsEdge ? edgeSprite : whiteSprite;
                 sr.flipX = overlayLayer.FlipX;
                 sr.sortingOrder = overlayLayer.IsEdge ? 1 : 0;

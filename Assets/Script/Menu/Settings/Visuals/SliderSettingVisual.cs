@@ -67,11 +67,11 @@ namespace YARG.Menu.Settings.Visuals
             _ignoreCallback = true;
             _slider.MinimumValue = Setting.Min;
             _slider.MaximumValue = Setting.Max;
-            if (Setting.Step > 0f)
-            {
-                _slider.WholeNumbers = Mathf.Approximately(Setting.Step, 1f);
-                _slider.FormatString = "0";
-            }
+            bool wholeSteps = Setting.Step > 0f && Mathf.Approximately(Setting.Step, 1f);
+            _slider.WholeNumbers = Setting.WholeNumbers || wholeSteps;
+            _slider.ClampMax = Setting.ClampMax;
+            if (Setting.WholeNumbers || wholeSteps)
+                _slider.FormatString = "F0";
 
             _ignoreCallback = false;
 
@@ -115,7 +115,11 @@ namespace YARG.Menu.Settings.Visuals
         {
             if (_ignoreCallback) return;
 
-            Setting.Value = _slider.Value;
+            float value = _slider.Value;
+            if (Setting.InputMax != null)
+                value = Mathf.Min(value, Setting.InputMax());
+
+            Setting.Value = value;
             RefreshVisual();
         }
     }
