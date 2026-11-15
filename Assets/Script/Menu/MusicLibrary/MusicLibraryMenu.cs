@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using YARG.Audio;
 using YARG.Core;
 using YARG.Core.Audio;
@@ -252,8 +251,7 @@ namespace YARG.Menu.MusicLibrary
             InitializeFilters();
 
             StemSettings.ApplySettings = SettingsManager.Settings.ApplyVolumesInMusicLibrary.Value;
-            SongContainer.ApplyDemucsLibraryRoots();
-            StemSilenceScanner.WarmCache();
+            SongContainer.ApplyCustomStemLibraryRoots();
             _previewDelay = 0;
             if (_reloadState == MusicLibraryReloadState.Full)
             {
@@ -355,30 +353,6 @@ namespace YARG.Menu.MusicLibrary
 
             // Ensure the sidebar is rendered correctly on first entry
             _sidebar.UpdateSidebar(true);
-            BeginStemSilenceScan();
-        }
-
-        private void BeginStemSilenceScan()
-        {
-            var priority = new List<SongEntry>();
-            if (ViewList != null)
-            {
-                for (int i = 0; i < ViewList.Count; i++)
-                {
-                    if (ViewList[i] is SongViewType song)
-                    {
-                        priority.Add(song.SongEntry);
-                    }
-                }
-            }
-
-            StemSilenceScanner.Start(priority, () =>
-            {
-                if (this != null && isActiveAndEnabled)
-                {
-                    RefreshViewsObjects();
-                }
-            });
         }
 
         protected virtual void InitializeFilters()
@@ -1063,59 +1037,8 @@ namespace YARG.Menu.MusicLibrary
             }
         }
 
-        private static bool WasDemucsShortcutPressed()
-        {
-            var keyboard = Keyboard.current;
-            if (keyboard == null)
-            {
-                return false;
-            }
-
-            bool ctrl = keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed;
-            return ctrl && keyboard.dKey.wasPressedThisFrame;
-        }
-
-        private void TryGenerateDemucsStems()
-        {
-            if (_popupMenu != null && _popupMenu.gameObject.activeSelf)
-            {
-                return;
-            }
-
-            if (IsFiltersMenuOpen() || _searchField.IsTextInputFocused)
-            {
-                return;
-            }
-
-            if (DialogManager.Instance != null && DialogManager.Instance.IsDialogShowing)
-            {
-                return;
-            }
-
-            if (CurrentSelection is not SongViewType songView)
-            {
-                return;
-            }
-
-            StopPreview();
-            DemucsStemGenerator.Start(songView.SongEntry, () =>
-            {
-                if (this == null)
-                {
-                    return;
-                }
-
-                RefreshAndReselect(preserveSelectedIndex: true);
-            });
-        }
-
         protected void Update()
         {
-            if (WasDemucsShortcutPressed())
-            {
-                TryGenerateDemucsStems();
-            }
-
             if (_needsNavigationSchemeRefresh && !IsNavigationSchemeBlocked())
             {
                 _needsNavigationSchemeRefresh = false;

@@ -169,7 +169,10 @@ namespace YARG.Song
         private static bool AllowedByRating(SongEntry song) =>
             GetEffectiveSongRating(song) <= SettingsManager.Settings.MaxSongRating.Value;
 
-        public static List<string> ApplyDemucsLibraryRoots()
+        /// <summary>
+        /// Tells YARG.Core where to look for custom stems (the demucs folder in each song folder).
+        /// </summary>
+        public static List<string> ApplyCustomStemLibraryRoots()
         {
             var directories = new List<string>(SettingsManager.Settings.SongFolders);
             string setlistPath = PathHelper.SetlistPath;
@@ -178,7 +181,7 @@ namespace YARG.Song
                 directories.Add(setlistPath);
             }
 
-            SongEntry.SetDemucsLibraryRoots(directories);
+            SongEntry.SetCustomStemLibraryRoots(directories);
             return directories;
         }
 
@@ -186,7 +189,7 @@ namespace YARG.Song
         public static async UniTask RunRefresh(bool quick, LoadingContext? context = null)
 #nullable disable
         {
-            var directories = ApplyDemucsLibraryRoots();
+            var directories = ApplyCustomStemLibraryRoots();
 
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var previousSongCache = _songCache;

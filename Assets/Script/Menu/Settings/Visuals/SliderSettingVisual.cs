@@ -67,10 +67,9 @@ namespace YARG.Menu.Settings.Visuals
             _ignoreCallback = true;
             _slider.MinimumValue = Setting.Min;
             _slider.MaximumValue = Setting.Max;
-            bool wholeSteps = Setting.Step > 0f && Mathf.Approximately(Setting.Step, 1f);
-            _slider.WholeNumbers = Setting.WholeNumbers || wholeSteps;
+            _slider.WholeNumbers = Setting.WholeNumbers;
             _slider.ClampMax = Setting.ClampMax;
-            if (Setting.WholeNumbers || wholeSteps)
+            if (Setting.WholeNumbers)
                 _slider.FormatString = "F0";
 
             _ignoreCallback = false;
@@ -90,25 +89,19 @@ namespace YARG.Menu.Settings.Visuals
                 NavigateFinish,
                 new NavigationScheme.Entry(MenuAction.Up, "Menu.Common.Increase", () =>
                 {
-                    Setting.Value += SliderStep();
+                    var range = Setting.Max - Setting.Min;
+                    Setting.Value += range / 20f;
+
                     RefreshVisual();
                 }),
                 new NavigationScheme.Entry(MenuAction.Down, "Menu.Common.Decrease", () =>
                 {
-                    Setting.Value -= SliderStep();
+                    var range = Setting.Max - Setting.Min;
+                    Setting.Value -= range / 20f;
+
                     RefreshVisual();
                 })
             }, true);
-        }
-
-        private float SliderStep()
-        {
-            if (Setting.Step > 0f)
-            {
-                return Setting.Step;
-            }
-
-            return (Setting.Max - Setting.Min) / 20f;
         }
 
         public void OnValueChange()

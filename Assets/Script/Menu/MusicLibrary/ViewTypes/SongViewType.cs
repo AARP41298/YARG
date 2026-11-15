@@ -53,8 +53,8 @@ namespace YARG.Menu.MusicLibrary
                 case StemSeparation.Missing:
                     name = ZString.Concat(name, " ", Localize.Key("Menu.MusicLibrary.NoStems"));
                     break;
-                case StemSeparation.Demucs:
-                    name = ZString.Concat(name, " ", Localize.Key("Menu.MusicLibrary.DemucsStems"));
+                case StemSeparation.Custom:
+                    name = ZString.Concat(name, " ", Localize.Key("Menu.MusicLibrary.CustomStems"));
                     break;
             }
 
