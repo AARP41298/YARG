@@ -87,6 +87,15 @@ namespace YARG.Menu.MusicLibrary
         [SerializeField]
         private Sprite _starWhiteSprite;
 
+        private void Awake()
+        {
+            // Lets song names show the inline song icons (see SongViewType.GetPrimaryText)
+            foreach (var text in PrimaryTexts)
+            {
+                SongIconSprites.Register(text);
+            }
+        }
+
         public override void Show(bool selected, ViewType viewType)
         {
             base.Show(selected, viewType);

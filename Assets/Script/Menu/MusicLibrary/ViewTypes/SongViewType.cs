@@ -54,8 +54,13 @@ namespace YARG.Menu.MusicLibrary
                     name = ZString.Concat(name, " ", Localize.Key("Menu.MusicLibrary.NoStems"));
                     break;
                 case StemSeparation.Custom:
-                    name = ZString.Concat(name, " ", Localize.Key("Menu.MusicLibrary.CustomStems"));
+                    name = ZString.Concat(name, " ", SongIconSprites.CustomStemsTag);
                     break;
+            }
+
+            if (SongEntry.HasVideoBackground())
+            {
+                name = ZString.Concat(name, " ", SongIconSprites.VideoTag);
             }
 
             return FormatAs(name, TextType.Primary, selected);

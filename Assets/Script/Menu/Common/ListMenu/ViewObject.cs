@@ -37,6 +37,8 @@ namespace YARG.Menu.ListMenu
         private TextMarquee _primaryMarquee;
         private TextMarquee _secondaryMarquee;
 
+        protected IReadOnlyList<TextMeshProUGUI> PrimaryTexts => _primaryText;
+
         protected bool Showing { get; private set; }
 
         protected TViewType ViewType;
