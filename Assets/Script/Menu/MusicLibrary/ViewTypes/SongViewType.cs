@@ -179,7 +179,7 @@ namespace YARG.Menu.MusicLibrary
             MusicLibraryMenu.ResetMainLibraryIndex();
             MusicLibraryMenu.SetReload(MusicLibraryReloadState.Partial);
 
-            GlobalVariables.State.CurrentSong = SongEntry;
+            GlobalVariables.State.SetPlaybackSong(SongEntry);
 
             MenuManager.Instance.PushMenu(MenuManager.Menu.DifficultySelect);
         }
