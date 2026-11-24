@@ -1,3 +1,51 @@
+# AARP41298 features
+
+This is a personal fork of [YARG](https://github.com/YARC-Official/YARG) that adds extra features on top of the official `dev` branch. It is kept up to date with upstream.
+
+### 🎤 Vocals compressor (karaoke ducking)
+
+Turns the song's original vocals down while you sing and brings them back when you stop, like a compressor in OBS with your microphone as the ducking source. It pairs well with custom stems for a karaoke feel, and there's no awkward silence when the singer is playing an instrument or forgets the lyrics.
+
+*Settings → Sound → Volume → Vocals Compressor*: Ratio, Threshold (dB), Attack (ms), Release (ms) and Output Gain (dB). Also available in the pause menu.
+
+<p align="center">
+  <img alt="Vocals compressor settings" src="./Images/AARP41298/VocalsCompressor.png" width="80%">
+</p>
+
+### 🎚️ Custom stems
+
+Songs that only ship a full mix (no separate vocals, bass or drums) can use stems made with [YARG-demucs](https://github.com/AARP41298/YARG-demucs). YARG reads them from a `demucs` folder in your song folder, so mute-on-miss, per-instrument volumes and the vocals compressor work on those songs too.
+
+### 🎬 Video backgrounds
+
+- **Second display:** send song and folder video backgrounds to a second monitor while the venue stays on the main screen. Between songs it shows a slideshow of images from a *Waiting* folder.
+- **Fit instead of fill:** 4:3 videos are shown whole instead of being cropped.
+
+### 📚 Music library
+
+- Icons after the song name for songs with a **background video** and songs using **custom stems**.
+- New **Video Background** filter (With Video / Without Video).
+
+<p align="center">
+  <img alt="Video and custom stems icons in the music library" src="./Images/AARP41298/LibraryIcons.webp" width="80%">
+</p>
+
+<p align="center">
+  <img alt="Video Background filter" src="./Images/AARP41298/VideoFilter.png" width="80%">
+</p>
+
+### 🗂️ Other
+
+- **`.yargignore`:** put an empty `.yargignore` file in a folder and the song scan skips that folder's files (subfolders are still scanned).
+
+### 🔗 More from AARP41298
+
+- **[YARG-demucs](https://github.com/AARP41298/YARG-demucs):** generates custom stems for songs that don't have them, for use with this fork.
+- **[BackstageHero](https://github.com/AARP41298/BackstageHero/releases/tag/v2.2.1-rc3)**
+- **[Nautilus](https://github.com/AARP41298/Nautilus/releases/tag/v566-rc3)**
+
+---
+
 <p align="center">
   <picture>
     <img alt="YARG Gameplay" src="./Images/Banner.png" width="100%">
