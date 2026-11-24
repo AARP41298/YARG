@@ -1240,6 +1240,11 @@
                 "Other": "Other",
                 "Unspecified": "Unspecified"
             },
+            "Video": {
+                "Name": "Video Background",
+                "WithVideo": "With Video",
+                "WithoutVideo": "Without Video"
+            },
             "Sources": "Song Sources",
             "Charters": "Charters",
             "Intensities": {

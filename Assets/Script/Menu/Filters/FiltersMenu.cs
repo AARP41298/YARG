@@ -140,6 +140,8 @@ namespace YARG.Menu.Filters
             new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, bool> _lengthEnabled =
             new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, bool> _videoEnabled =
+            new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<Guid, Dictionary<string, bool>> _intensityEnabledByProfile =
             new();
 
@@ -153,6 +155,7 @@ namespace YARG.Menu.Filters
         private static Dictionary<string, int> _cachedPlaylistCounts;
         private static IReadOnlyList<string> _cachedCharters;
         private static IReadOnlyList<string> _cachedLengths;
+        private static IReadOnlyList<string> _cachedVideos;
         private static readonly Dictionary<(Instrument, GameMode?), IReadOnlyList<string>> _cachedIntensities = new();
 
         private static int _cachedGenreSongCount = -1;
@@ -165,6 +168,7 @@ namespace YARG.Menu.Filters
         private static int _cachedPlaylistCountsSignature = -1;
         private static int _cachedCharterSongCount = -1;
         private static int _cachedLengthSongCount = -1;
+        private static int _cachedVideoSongCount = -1;
         private static SongLengthLabelMode? _cachedLengthLabelMode;
         private static int _cachedIntensitySongCount = -1;
 
@@ -504,6 +508,7 @@ namespace YARG.Menu.Filters
 
             AddGroup(container, navGroup, new FilterKey(FilterGroup.Length), Localize.Key("Menu.Filters.Length.Name"))?.AssignIndex(rowIndex++);
             AddGroup(container, navGroup, new FilterKey(FilterGroup.VocalistGender), Localize.Key("Menu.Filters.VocalistGender.Name"))?.AssignIndex(rowIndex++);
+            AddGroup(container, navGroup, new FilterKey(FilterGroup.Video), Localize.Key("Menu.Filters.Video.Name"))?.AssignIndex(rowIndex++);
 
             AddHeader(container, Localize.Key("Menu.Filters.ShowAnyOfHeader"));
             rowIndex = 0;
@@ -1150,6 +1155,12 @@ namespace YARG.Menu.Filters
                 GetAllLengthsCached,
                 GetLengthCounts,
                 _lengthEnabled);
+
+            yield return new FilterDef(
+                new FilterKey(FilterGroup.Video),
+                GetAllVideosCached,
+                GetVideoCounts,
+                _videoEnabled);
         }
 
         private bool TryGetFilterDef(FilterKey key, out FilterDef def)
@@ -1430,6 +1441,9 @@ namespace YARG.Menu.Filters
                     var label = GetSongLengthLabel(entry.SongLengthMilliseconds);
                     return label != null && lengths.Contains(NormalizeFilterKey(label));
                 });
+
+            if (TryGetSelectedSet(_videoEnabled, GetAllVideosCached(), NormalizeFilterKey, out var videos))
+                predicates.Add(entry => videos.Contains(NormalizeFilterKey(GetVideoLabel(entry))));
 
             foreach (var def in GetFilterDefs())
             {
@@ -1717,6 +1731,43 @@ namespace YARG.Menu.Filters
                 _ => null
             };
         }
+#endregion
+
+#region Video
+        private static IReadOnlyList<string> GetAllVideosCached()
+        {
+            return GetAllCached(ref _cachedVideos, ref _cachedVideoSongCount, () =>
+            {
+                var counts = GetVideoCounts();
+                return VideoLabels
+                    .Where(label => counts.TryGetValue(label, out int count) && count > 0)
+                    .ToArray();
+            });
+        }
+
+        private static Dictionary<string, int> GetVideoCounts()
+        {
+            var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var song in SongContainer.Songs)
+            {
+                var label = GetVideoLabel(song);
+                dict.TryGetValue(label, out int count);
+                dict[label] = count + 1;
+            }
+
+            return dict;
+        }
+
+        private static IReadOnlyList<string> VideoLabels => new[]
+        {
+            Localize.Key("Menu.Filters.Video.WithVideo"),
+            Localize.Key("Menu.Filters.Video.WithoutVideo"),
+        };
+
+        // HasVideoBackground() checks the song folder once per song and caches the result
+        private static string GetVideoLabel(SongEntry song) => song.HasVideoBackground()
+            ? Localize.Key("Menu.Filters.Video.WithVideo")
+            : Localize.Key("Menu.Filters.Video.WithoutVideo");
 #endregion
 
 #region Source

@@ -106,7 +106,8 @@ namespace YARG.Menu.Filters
         Charter,
         Intensity,
         Length,
-        VocalistGender
+        VocalistGender,
+        Video
     }
 }
 
