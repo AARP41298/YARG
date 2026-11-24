@@ -341,6 +341,8 @@ namespace YARG.Gameplay
             BandScore = totalScore;
             EngineManager.UpdateStars();
 
+            UpdateVocalsCompressor();
+
             // End song if needed (required for the [end] event)
             if (_songRunner.SongTime >= SongLength)
             {

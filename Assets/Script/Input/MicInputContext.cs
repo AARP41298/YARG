@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using YARG.Audio;
+using YARG.Audio.BASS;
 using YARG.Core.Audio;
 using YARG.Core.Input;
 using YARG.Gameplay;
@@ -57,6 +58,23 @@ namespace YARG.Input
                     yield return gameInput;
                 }
             }
+        }
+
+        /// <summary>
+        /// The loudest current level across this player's mics, in dBFS.
+        /// </summary>
+        public float GetLevelDbfs()
+        {
+            float level = float.NegativeInfinity;
+            foreach (var device in _devices)
+            {
+                if (device is BassMicDevice bassDevice && bassDevice.CurrentLevelDbfs > level)
+                {
+                    level = bassDevice.CurrentLevelDbfs;
+                }
+            }
+
+            return level;
         }
 
         /// <summary>

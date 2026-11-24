@@ -94,6 +94,9 @@ namespace YARG.Audio.BASS
             }
         }
 
+        /// <inheritdoc cref="BassMicAnalyzer.CurrentLevelDbfs"/>
+        public float CurrentLevelDbfs => _analyzer.CurrentLevelDbfs;
+
         public override void SetMonitoringLevel(float volume) => _source.SetMonitoringLevel(volume);
 
         public override void SetReverbLevel(float wet) => _source.SetReverbLevel(wet);

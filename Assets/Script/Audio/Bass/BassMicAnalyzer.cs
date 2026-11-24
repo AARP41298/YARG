@@ -34,6 +34,9 @@ namespace YARG.Audio.BASS
         private const float CALIBRATION_GAIN  = 180f;
         private const float UNAVAILABLE_VALUE = -1f;
 
+        // MeasureAmplitude scales by CALIBRATION_GAIN, i.e. adds this many dB on top of dBFS
+        private static readonly float CALIBRATION_GAIN_DB = 20f * Mathf.Log10(CALIBRATION_GAIN);
+
         private const int AMPLITUDE_STRIDE   = 4;
         private const int IDLE_SLEEP_MS      = 1;
 
@@ -56,6 +59,14 @@ namespace YARG.Audio.BASS
         private bool   _paused;
 
         private volatile bool _stopRequested;
+
+        private volatile float _currentLevelDbfs = SILENCE_FLOOR_DB;
+
+        /// <summary>
+        ///     Level of the most recent analysis frame in dBFS (0 = full scale), regardless of whether a pitch
+        ///     was detected. Sits at the silence floor while the mic isn't being analyzed.
+        /// </summary>
+        public float CurrentLevelDbfs => _currentLevelDbfs;
 
         public BassMicAnalyzer(IBassMicSampleSource source, Func<bool> isOutputRecording, Func<double> getInputTime)
         {
@@ -224,6 +235,7 @@ namespace YARG.Audio.BASS
         private void AnalyzeFrame(float[] samples, double frameEndTime)
         {
             float amplitude = MeasureAmplitude(samples);
+            _currentLevelDbfs = amplitude <= SILENCE_FLOOR_DB ? SILENCE_FLOOR_DB : amplitude - CALIBRATION_GAIN_DB;
 
             if (_lastAmplitude is { } previousAmplitude && amplitude - previousAmplitude >= HIT_THRESHOLD_DB)
             {
@@ -273,6 +285,7 @@ namespace YARG.Audio.BASS
         {
             _lastPitch = null;
             _lastAmplitude = null;
+            _currentLevelDbfs = SILENCE_FLOOR_DB;
             _frameSamples = 0;
             Array.Clear(_frameBuffer, 0, _frameBuffer.Length);
             _pitchTracker.Reset();

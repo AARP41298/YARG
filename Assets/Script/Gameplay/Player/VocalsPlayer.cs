@@ -416,6 +416,14 @@ namespace YARG.Gameplay.Player
             }
         }
 
+        /// <summary>
+        /// The live level of this player's mic in dBFS, or negative infinity without a live mic
+        /// (bots, replays). Used as the vocals compressor's sidechain.
+        /// </summary>
+        public float MicLevelDbfs => HasLiveMic ? _inputContext.GetLevelDbfs() : float.NegativeInfinity;
+
+        public bool HasLiveMic => !IsBot && !Player.IsReplay && _inputContext != null;
+
         private bool IsInThreshold(double currentTime, double? lastTime)
         {
             if (lastTime is null)

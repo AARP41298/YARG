@@ -11,6 +11,7 @@ using YARG.Core.Chart;
 using YARG.Core.Extensions;
 using YARG.Gameplay.Player;
 using YARG.Integration;
+using YARG.Settings;
 using YARG.Venue.Characters;
 
 namespace YARG.Gameplay
@@ -592,6 +593,23 @@ namespace YARG.Gameplay
                     text.AppendFormat("Video calibration: {0}ms\n", _songRunner.VideoCalibration);
                     text.AppendFormat("Song offset: {0}ms\n", _songRunner.SongOffset);
                     text.AppendFormat("Device audio latency: {0}ms\n", GlobalAudioHandler.PlaybackLatency);
+
+                    GUILayout.Label(text.AsSpan().TrimEnd('\n').ToString());
+                }
+
+                using (DebugVerticalArea.Begin("Vocals Compressor", VerticalGroupStyle))
+                {
+                    using var text = ZString.CreateStringBuilder(true);
+
+                    var settings = SettingsManager.Settings;
+                    text.AppendFormat("Enabled: {0}\n", settings.VocalsCompressor.Value);
+                    text.AppendFormat("Song has vocals stem: {0}\n", _stemStates.ContainsKey(SongStem.Vocals));
+                    text.AppendFormat("Live mics: {0}\n", _vocalsCompressorMicCount);
+                    text.AppendFormat("Mic level: {0:0.0} dBFS (threshold {1} dB)\n",
+                        _vocalsCompressorLevelDb, settings.VocalsCompressorThreshold.Value);
+                    text.AppendFormat("Gain reduction: {0:0.0} dB\n", _vocalsGainReductionDb);
+                    text.AppendFormat("Vocals Volume setting: {0:0%}\n", settings.VocalsVolume.Value);
+                    text.AppendFormat("Vocal stem volume sent: {0:0%}\n", _vocalsCompressorAppliedVolume);
 
                     GUILayout.Label(text.AsSpan().TrimEnd('\n').ToString());
                 }

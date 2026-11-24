@@ -2500,6 +2500,36 @@
                 "PauseName": "Vocals",
                 "Description": "Adjusts the song's vocal track volume. Only does something if the song is multi-track."
             },
+            "VocalsCompressor": {
+                "Name": "Vocals Compressor",
+                "PauseName": "Vocals Compressor",
+                "Description": "Turns the song's vocal track down while you sing and brings it back when you stop, like a compressor in OBS with your microphone as the ducking source. Works on top of Vocals Volume. Only does something if the song has a separate vocal track and someone is playing vocals with a microphone."
+            },
+            "VocalsCompressorRatio": {
+                "Name": "Ratio",
+                "PauseName": "Compressor Ratio",
+                "Description": "How hard the vocal track is turned down. For every this-many dB your microphone goes over the threshold, the vocal track only gets 1 dB louder. Higher means more ducking."
+            },
+            "VocalsCompressorThreshold": {
+                "Name": "Threshold (dB)",
+                "PauseName": "Compressor Threshold",
+                "Description": "Microphone level, in dBFS, above which the vocal track starts getting turned down. Lower it if quiet singing doesn't duck the vocals, raise it if background noise does."
+            },
+            "VocalsCompressorAttack": {
+                "Name": "Attack (ms)",
+                "PauseName": "Compressor Attack",
+                "Description": "How quickly the vocal track is turned down once you start singing."
+            },
+            "VocalsCompressorRelease": {
+                "Name": "Release (ms)",
+                "PauseName": "Compressor Release",
+                "Description": "How slowly the vocal track comes back once you stop singing. Longer values keep it down through short pauses between lines."
+            },
+            "VocalsCompressorOutputGain": {
+                "Name": "Output Gain (dB)",
+                "PauseName": "Compressor Gain",
+                "Description": "Extra gain on the vocal track after compression. The result can't go above full volume, so a boost only helps when Vocals Volume is below 100%."
+            },
             "VoiceActivatedVocalStarPower": {
                 "Name": "Voice Activated Star Power (Vocals)",
                 "Description": "If enabled, vocalists can activate their Star Power by making a noise. Keybinds can be used instead, regardless of this setting."

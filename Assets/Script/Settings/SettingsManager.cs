@@ -136,6 +136,12 @@ namespace YARG.Settings
                 nameof(Settings.KeysVolume),
                 nameof(Settings.DrumsVolume),
                 nameof(Settings.VocalsVolume),
+                nameof(Settings.VocalsCompressor),
+                new FieldMetadata(nameof(Settings.VocalsCompressorRatio), visibleWhen: IsVocalsCompressorVisible),
+                new FieldMetadata(nameof(Settings.VocalsCompressorThreshold), visibleWhen: IsVocalsCompressorVisible),
+                new FieldMetadata(nameof(Settings.VocalsCompressorAttack), visibleWhen: IsVocalsCompressorVisible),
+                new FieldMetadata(nameof(Settings.VocalsCompressorRelease), visibleWhen: IsVocalsCompressorVisible),
+                new FieldMetadata(nameof(Settings.VocalsCompressorOutputGain), visibleWhen: IsVocalsCompressorVisible),
                 nameof(Settings.SongVolume),
                 nameof(Settings.CrowdVolume),
                 nameof(Settings.SfxVolume),
@@ -340,6 +346,8 @@ namespace YARG.Settings
             RuntimePlatform.WindowsEditor;
 
         private static bool IsAsioVisible() => IsWindows() && Settings?.OutputMode.Value == AudioOutputMode.Asio;
+
+        private static bool IsVocalsCompressorVisible() => Settings?.VocalsCompressor.Value == true;
 
         public static void LoadSettings()
         {

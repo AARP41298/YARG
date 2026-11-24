@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
@@ -5,6 +6,7 @@ using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
 using UnityEngine;
 using YARG.Core.Audio;
+using YARG.Gameplay.Player;
 using YARG.Settings;
 
 namespace YARG.Gameplay
@@ -89,6 +91,15 @@ namespace YARG.Gameplay
             }
         }
 
+        // Vocals compressor state: current gain reduction in dB (smoothed by attack/release),
+        // and the last volume sent to the mixer so it's only touched when it actually changes.
+        private const double VOCALS_COMPRESSOR_EPSILON = 0.001;
+
+        private double _vocalsGainReductionDb;
+        private double _vocalsCompressorLevelDb = double.NegativeInfinity;
+        private int    _vocalsCompressorMicCount;
+        private double _vocalsCompressorAppliedVolume = -1;
+
         private readonly Dictionary<SongStem, StemState>        _stemStates = new();
         private          SongStem                               _backgroundStem;
         private          TweenerCore<double, double, NoOptions> _volumeTween;
@@ -115,6 +126,64 @@ namespace YARG.Gameplay
             }
 
             _backgroundStem = _stemStates.Count > 1 ? SongStem.Song : _stemStates.First().Key;
+        }
+
+        /// <summary>
+        /// Sidechain compressor on the vocal stem keyed by the singers' mics, like an OBS compressor
+        /// with the mic as ducking source. Singing above the threshold pulls the song's vocals down by
+        /// (level - threshold) * (1 - 1 / ratio) dB; attack and release smooth that reduction.
+        /// </summary>
+        private void UpdateVocalsCompressor()
+        {
+            var settings = SettingsManager.Settings;
+            if (!settings.VocalsCompressor.Value || !_stemStates.ContainsKey(SongStem.Vocals))
+            {
+                if (_vocalsCompressorAppliedVolume >= 0)
+                {
+                    // Turned off mid-song: back to the plain vocals volume
+                    _vocalsGainReductionDb = 0;
+                    _vocalsCompressorAppliedVolume = -1;
+                    GlobalAudioHandler.SetVolumeSetting(SongStem.Vocals, settings.VocalsVolume.Value);
+                }
+                return;
+            }
+
+            // Sidechain level: the loudest singer
+            double level = double.NegativeInfinity;
+            int micCount = 0;
+            foreach (var player in _players)
+            {
+                if (player is VocalsPlayer vocalsPlayer && vocalsPlayer.HasLiveMic)
+                {
+                    micCount++;
+                    level = Math.Max(level, vocalsPlayer.MicLevelDbfs);
+                }
+            }
+
+            _vocalsCompressorLevelDb = level;
+            _vocalsCompressorMicCount = micCount;
+
+            double threshold = settings.VocalsCompressorThreshold.Value;
+            double ratio = Math.Max(1, settings.VocalsCompressorRatio.Value);
+            double targetReduction = level > threshold
+                ? (level - threshold) * (1 - 1 / ratio)
+                : 0;
+
+            // Attack when the reduction grows, release when it shrinks (one-pole smoothing)
+            double timeMs = targetReduction > _vocalsGainReductionDb
+                ? settings.VocalsCompressorAttack.Value
+                : settings.VocalsCompressorRelease.Value;
+            double coefficient = Math.Exp(-Time.unscaledDeltaTime * 1000.0 / Math.Max(1, timeMs));
+            _vocalsGainReductionDb = targetReduction + (_vocalsGainReductionDb - targetReduction) * coefficient;
+
+            double gainDb = settings.VocalsCompressorOutputGain.Value - _vocalsGainReductionDb;
+            double volume = Math.Clamp(settings.VocalsVolume.Value * Math.Pow(10, gainDb / 20), 0, 1);
+
+            if (Math.Abs(volume - _vocalsCompressorAppliedVolume) >= VOCALS_COMPRESSOR_EPSILON)
+            {
+                _vocalsCompressorAppliedVolume = volume;
+                GlobalAudioHandler.SetVolumeSetting(SongStem.Vocals, volume);
+            }
         }
 
         public void ChangeStarPowerStatus(bool active)

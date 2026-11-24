@@ -492,6 +492,18 @@ namespace YARG.Settings
             public VolumeSetting VocalsVolume { get; } =
                 new(1f, v => GlobalAudioHandler.SetVolumeSetting(SongStem.Vocals, v));
 
+            // Sidechain compressor on the vocal stem, keyed by the singers' microphones (like an OBS
+            // compressor with the mic as ducking source): singing above the threshold turns the song's
+            // vocals down, and they come back when the mic goes quiet. Applied on top of VocalsVolume.
+            public ToggleSetting VocalsCompressor { get; } =
+                new(false, _ => SettingsMenu.Instance?.RefreshAndKeepPosition());
+
+            public IntSetting VocalsCompressorRatio      { get; } = new(10, 1, 32);
+            public IntSetting VocalsCompressorThreshold  { get; } = new(-20, -60, 0);
+            public IntSetting VocalsCompressorAttack     { get; } = new(15, 1, 500);
+            public IntSetting VocalsCompressorRelease    { get; } = new(500, 1, 3000);
+            public IntSetting VocalsCompressorOutputGain { get; } = new(0, -32, 32);
+
             public VolumeSetting SongVolume { get; } =
                 new(1f, v => GlobalAudioHandler.SetVolumeSetting(SongStem.Song, v));
 
